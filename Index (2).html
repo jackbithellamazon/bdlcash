@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BDLCash</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#141416; --bg2:#1a1a1d; --surface:#222226; --surface2:#2a2a2e; --surface3:#323237;
+  --border:#3a3a42; --border2:#505060;
+  --text:#ffffff; --text2:#c8c8d8; --text3:#7878a0;
+  --green:#00e676; --green-dim:rgba(0,230,118,0.13);
+  --amber:#ffd60a; --amber-dim:rgba(255,214,10,0.13);
+  --red:#ff4f4f; --red-dim:rgba(255,79,79,0.13);
+  --blue:#4da6ff; --blue-dim:rgba(77,166,255,0.13);
+  --purple:#bf5fff; --purple-dim:rgba(191,95,255,0.13);
+  --monzo:#ff5c3a;
+  --radius:16px; --radius-sm:10px;
+  --shadow:0 2px 8px rgba(0,0,0,0.4); --shadow-lg:0 8px 40px rgba(0,0,0,0.6);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Cabinet Grotesk',sans-serif;min-height:100vh}
+
+/* HEADER */
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+.logo{font-size:17px;font-weight:900;letter-spacing:2px}
+.logo em{color:var(--monzo);font-style:normal}
+.today-badge{background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:5px 14px;font-family:'Instrument Mono',monospace;font-size:12px;color:var(--text2)}
+.today-badge strong{color:var(--text)}
+.header-stats{display:flex;height:100%}
+.hstat{display:flex;flex-direction:column;justify-content:center;padding:0 20px;border-left:1px solid var(--border);text-align:right}
+.hstat-label{font-family:'Instrument Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:2px}
+.hstat-value{font-size:16px;font-weight:900;line-height:1}
+.cg{color:var(--green)}.cr{color:var(--red)}.ca{color:var(--amber)}.cm{color:var(--monzo)}
+
+/* ALERTS */
+.alerts-bar{background:rgba(255,214,10,0.08);border-bottom:1px solid rgba(255,214,10,0.2);padding:8px 32px;display:flex;gap:8px;flex-wrap:wrap}
+.alerts-bar:empty{display:none}
+.alert-pill{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid rgba(255,214,10,0.35);border-radius:100px;padding:5px 12px;font-size:12px;font-weight:700;color:var(--amber)}
+.alert-pill.red{border-color:rgba(255,79,79,0.45);color:var(--red)}
+.alert-pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 1.5s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+/* LAYOUT */
+.container{max-width:1440px;margin:0 auto;padding:24px 32px}
+.slabel{font-family:'Instrument Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:12px;margin-top:28px;display:flex;align-items:center;gap:8px}
+.slabel::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* BANK HERO */
+.bank-hero{background:linear-gradient(135deg,#c0392b 0%,var(--monzo) 55%,#ff7f5c 100%);border-radius:var(--radius);padding:24px 28px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:28px;position:relative;overflow:hidden;cursor:pointer;transition:transform 0.2s}
+.bank-hero:hover{transform:translateY(-2px)}
+.bank-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,0.07)}
+.bank-left{flex:1;position:relative;z-index:1}
+.bank-badge{font-family:'Instrument Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.monzo-tag{background:rgba(255,255,255,0.2);border-radius:100px;padding:2px 8px;font-size:9px;font-weight:700}
+.bank-amount-row{display:flex;align-items:center;gap:8px}
+.bank-prefix{font-size:28px;font-weight:900;color:rgba(255,255,255,0.4)}
+.bank-input{background:none;border:none;font-family:'Cabinet Grotesk',sans-serif;font-size:48px;font-weight:900;color:#fff;outline:none;width:100%;line-height:1}
+.bank-input::placeholder{color:rgba(255,255,255,0.28)}
+.bank-meta{font-family:'Instrument Mono',monospace;font-size:10px;color:rgba(255,255,255,0.38);margin-top:6px}
+.bank-right{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px;min-width:180px}
+.bank-stat{background:rgba(0,0,0,0.22);border-radius:10px;padding:12px 14px}
+.bank-stat-lbl{font-family:'Instrument Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.42);margin-bottom:3px}
+.bank-stat-val{font-size:20px;font-weight:900;color:#fff}
+
+/* POS CARDS */
+.pos-card{background:var(--surface);border-radius:var(--radius);padding:18px 20px;border:1px solid var(--border);transition:all 0.2s}
+.pos-card-label{font-family:'Instrument Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin-bottom:6px}
+.pos-card-value{font-size:26px;font-weight:900;line-height:1}
+.pos-card-sub{font-size:11px;color:var(--text2);margin-top:5px;font-weight:600}
+.pos-card.green{border:1px solid rgba(0,230,118,0.3);background:linear-gradient(135deg,var(--surface),rgba(0,230,118,0.05))}.pos-card.green .pos-card-value{color:var(--green)}
+.pos-card.red{border:1px solid rgba(255,79,79,0.3);background:linear-gradient(135deg,var(--surface),rgba(255,79,79,0.05))}.pos-card.red .pos-card-value{color:var(--red)}
+.pos-card.amber{border:1px solid rgba(255,214,10,0.3);background:linear-gradient(135deg,var(--surface),rgba(255,214,10,0.05))}.pos-card.amber .pos-card-value{color:var(--amber)}
+.pos-card.blue{border:1px solid rgba(77,166,255,0.3);background:linear-gradient(135deg,var(--surface),rgba(77,166,255,0.05))}.pos-card.blue .pos-card-value{color:var(--blue)}
+
+/* CREDIT CARD TILES */
+.cc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.cc-tile{border-radius:20px;overflow:hidden;box-shadow:var(--shadow-lg);cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;min-height:340px;display:flex;flex-direction:column;position:relative}
+.cc-tile:hover{transform:translateY(-6px) scale(1.01);box-shadow:0 24px 60px rgba(0,0,0,0.65)}
+.cc-tile.plat{background:linear-gradient(145deg,#d0d0d0 0%,#f0f0f0 30%,#b8b8b8 65%,#e0e0e0 100%);color:#1a1a1a}
+.cc-tile.gold{background:linear-gradient(145deg,#a86c0a 0%,#f0bc28 38%,#d09010 68%,#b87c0c 100%);color:#111}
+.cc-tile.cot{background:linear-gradient(145deg,#0d0d0d 0%,#1e1e1e 50%,#080808 100%);color:#fff}
+.cc-tile.barc{background:linear-gradient(145deg,#002f70 0%,#004ea8 50%,#003d90 100%);color:#fff}
+.cc-shine{position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.14) 0%,transparent 55%,rgba(255,255,255,0.04) 100%);pointer-events:none}
+.cc-body{padding:22px 22px 18px;display:flex;flex-direction:column;flex:1;position:relative;z-index:1}
+.cc-top-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:auto}
+.cc-chip{width:36px;height:28px;border-radius:5px}
+.plat .cc-chip{background:linear-gradient(135deg,#888,#bbb);border:1px solid rgba(0,0,0,0.2)}
+.gold .cc-chip{background:linear-gradient(135deg,#c8960c,#f0d060);border:1px solid rgba(0,0,0,0.2)}
+.cot  .cc-chip{background:linear-gradient(135deg,#333,#555);border:1px solid #ffd200}
+.barc .cc-chip{background:linear-gradient(135deg,#0073c6,#4aa8e8);border:1px solid rgba(255,255,255,0.3)}
+.cc-network{font-family:'Instrument Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1px;opacity:0.6;text-transform:uppercase}
+.cot .cc-network{color:#ffd200;opacity:1}
+
+.cc-balance-section{margin:18px 0 10px}
+.cc-balance-label{font-family:'Instrument Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;opacity:0.52;margin-bottom:4px}
+.plat .cc-balance-label{color:#333}
+.cc-balance-amount{font-size:34px;font-weight:900;line-height:1}
+.plat .cc-balance-amount{color:#1a1a1a}
+.cc-limit-txt{font-size:11px;opacity:0.52;font-weight:600;margin-top:3px}
+.plat .cc-limit-txt{color:#333}
+
+.cc-usage-bar{height:5px;border-radius:100px;overflow:hidden;margin:8px 0 16px}
+.plat .cc-usage-bar{background:rgba(0,0,0,0.13)}
+.gold .cc-usage-bar,.cot .cc-usage-bar,.barc .cc-usage-bar{background:rgba(255,255,255,0.16)}
+.cc-usage-fill{height:100%;border-radius:100px;transition:width 0.5s}
+.plat .cc-usage-fill{background:#1a1a1a}
+.gold .cc-usage-fill{background:rgba(255,255,255,0.9)}
+.cot  .cc-usage-fill{background:#ffd200}
+.barc .cc-usage-fill{background:rgba(255,255,255,0.85)}
+
+/* DUE DATE — NEW FORMAT */
+.cc-due-row{display:flex;gap:12px;margin-bottom:16px}
+.cc-due-blk{flex:1}
+.cc-due-blk-lbl{font-family:'Instrument Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;opacity:0.48;display:block;margin-bottom:5px}
+.plat .cc-due-blk-lbl{color:#333}
+.cc-due-countdown{font-size:14px;font-weight:900;display:block;line-height:1;letter-spacing:0.3px}
+.cc-due-date-txt{font-family:'Instrument Mono',monospace;font-size:13px;font-weight:500;display:block;margin-top:4px;opacity:0.7}
+.plat .cc-due-date-txt{color:#333}
+.cc-due-countdown.urgent{color:#ff453a !important}
+.cc-due-countdown.soon{color:#ffd60a !important}
+
+.cot-strip{background:#ffd200;color:#000;border-radius:7px;padding:6px 10px;font-size:11px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:5px}
+
+.cc-btn-row{display:flex;gap:8px;margin-top:auto}
+.cc-pay-btn{flex:1;border:none;border-radius:9px;padding:11px 8px;font-family:'Cabinet Grotesk',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:all 0.15s}
+.plat .cc-pay-btn{background:#1a1a1a;color:#fff}
+.gold .cc-pay-btn{background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.35)}
+.cot  .cc-pay-btn{background:#ffd200;color:#000}
+.barc .cc-pay-btn{background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.28)}
+.cc-pay-btn:hover{opacity:0.8;transform:translateY(-1px)}
+.cc-info-btn{background:rgba(255,255,255,0.1);border:none;border-radius:9px;padding:11px 14px;font-size:14px;cursor:pointer;transition:all 0.15s}
+.plat .cc-info-btn{background:rgba(0,0,0,0.1)}
+.cc-info-btn:hover{background:rgba(255,255,255,0.22)}
+
+/* PANEL */
+.panel{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.panel.green-border{border-color:rgba(0,230,118,0.25)}
+.panel.amber-border{border-color:rgba(255,214,10,0.25)}
+.panel.blue-border{border-color:rgba(77,166,255,0.25)}
+.panel.purple-border{border-color:rgba(191,95,255,0.25)}
+.panel-header{padding:16px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:13px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px}
+.panel-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.panel-body{padding:16px 20px}
+
+/* AMAZON — MONZO STYLE PAYOUT CARDS */
+.amz-panel{background:var(--surface);border-radius:var(--radius);border:2px solid rgba(255,214,10,0.3);overflow:hidden}
+.amz-panel .panel-header{background:linear-gradient(135deg,rgba(255,214,10,0.12),rgba(255,214,10,0.04));border-bottom:1px solid rgba(255,214,10,0.2)}
+.amz-panel .panel-title{color:var(--amber)}
+.amz-form{display:grid;grid-template-columns:1fr 130px 110px auto;gap:10px;align-items:flex-end;margin-bottom:20px}
+
+/* MONZO-STYLE PAYOUT CARDS */
+.monzo-payout-group{margin-bottom:14px}
+.monzo-payout-header{font-family:'Instrument Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:8px;padding:0 2px}
+.monzo-payout-card{background:var(--surface2);border-radius:12px;border:1px solid rgba(255,214,10,0.2);padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:8px;transition:all 0.15s}
+.monzo-payout-card:hover{border-color:rgba(255,214,10,0.4)}
+.monzo-payout-card.arrived{border-color:rgba(0,230,118,0.3);background:rgba(0,230,118,0.05)}
+.monzo-payout-icon{width:40px;height:40px;border-radius:10px;background:rgba(255,214,10,0.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.monzo-payout-card.arrived .monzo-payout-icon{background:rgba(0,230,118,0.15)}
+.monzo-payout-info{flex:1}
+.monzo-payout-label{font-size:16px;font-weight:900;color:var(--text)}
+.monzo-payout-sub{font-size:11px;color:var(--text2);margin-top:2px;font-weight:600}
+.monzo-payout-amount{font-size:22px;font-weight:900;color:var(--amber)}
+.monzo-payout-card.arrived .monzo-payout-amount{color:var(--green)}
+.monzo-payout-actions{display:flex;gap:6px;align-items:center}
+.monzo-arrive-btn{background:rgba(0,230,118,0.15);color:var(--green);border:1px solid rgba(0,230,118,0.3);border-radius:8px;padding:6px 12px;font-family:'Cabinet Grotesk',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.monzo-arrive-btn:hover{background:rgba(0,230,118,0.25)}
+.eta-sel{background:var(--surface3);border:1px solid rgba(255,214,10,0.4);border-radius:8px;color:var(--amber);font-family:'Cabinet Grotesk',sans-serif;font-size:12px;font-weight:700;padding:6px 10px;outline:none}
+.eta-sel option{background:var(--surface2)}
+
+/* OUTGOINGS — BRIGHTER */
+.view-tabs{display:flex;gap:4px;background:var(--surface2);border-radius:var(--radius-sm);padding:4px;margin-bottom:14px}
+.view-tab{flex:1;padding:7px;text-align:center;font-size:12px;font-weight:700;border-radius:7px;cursor:pointer;color:var(--text2);border:none;background:none;font-family:'Cabinet Grotesk',sans-serif;transition:all 0.15s}
+.view-tab.active{background:var(--surface3);color:var(--amber)}
+.out-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);margin-bottom:6px}
+.out-item.urgent{background:var(--red-dim);border-color:rgba(255,79,79,0.35)}
+.out-item.soon{background:var(--amber-dim);border-color:rgba(255,214,10,0.35)}
+.out-day{font-family:'Instrument Mono',monospace;font-size:11px;font-weight:700;color:var(--blue);width:36px;text-align:center;flex-shrink:0}
+.out-day.now{color:var(--red)}
+.out-name{flex:1;font-size:13px;font-weight:700;color:var(--text)}
+.out-cat{font-size:10px;color:var(--text2);font-weight:700;padding:2px 8px;background:var(--surface3);border-radius:100px;white-space:nowrap}
+.out-amount{font-size:14px;font-weight:900;color:var(--red);white-space:nowrap}
+
+/* STRATEGY TILES */
+.strategy-tile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.strategy-tile{border-radius:12px;padding:14px 16px;transition:all 0.2s;border:2px solid transparent}
+.strategy-tile:hover{transform:translateY(-2px)}
+.strategy-tile-name{font-size:11px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;opacity:0.8}
+.strategy-tile-status{font-size:15px;font-weight:900;margin-bottom:5px}
+.strategy-tile-reason{font-size:10px;font-weight:600;opacity:0.75;line-height:1.4}
+.purchase-rec{background:var(--surface2);border-radius:var(--radius-sm);padding:14px 16px;border:1px solid var(--border);margin-top:4px}
+.purchase-rec-label{font-family:'Instrument Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
+.purchase-rec-row{display:flex;gap:8px;align-items:center}
+.purchase-rec-result{margin-top:10px;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:700;display:none}
+
+/* AVIOS TILE */
+.avios-bar{background:linear-gradient(135deg,#180d38 0%,#2a1060 50%,#1a0840 100%);border-radius:var(--radius);padding:22px 28px;margin-top:16px;display:flex;align-items:center;gap:24px;border:1px solid rgba(191,95,255,0.35)}
+.avios-icon{font-size:40px}
+.avios-info{flex:1}
+.avios-label{font-family:'Instrument Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(191,95,255,0.7);margin-bottom:4px}
+.avios-value{font-size:42px;font-weight:900;color:#d080ff;line-height:1}
+.avios-sub{font-size:12px;color:rgba(191,95,255,0.6);margin-top:4px;font-weight:600}
+.avios-breakdown{display:flex;gap:20px}
+.avios-card-item{text-align:center}
+.avios-card-name{font-size:10px;color:rgba(255,255,255,0.4);font-weight:600;margin-bottom:2px}
+.avios-card-pts{font-size:18px;font-weight:900;color:rgba(208,128,255,0.85)}
+
+/* OTHER INCOME */
+.income-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid rgba(0,230,118,0.25);margin-bottom:8px}
+.income-days-block{text-align:center;min-width:60px}
+.income-days-num{font-size:22px;font-weight:900;color:var(--green);display:block;line-height:1}
+.income-days-lbl{font-family:'Instrument Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(0,230,118,0.6);display:block;margin-top:2px}
+.income-name{flex:1;font-size:14px;font-weight:800;color:var(--text)}
+.income-amount{font-size:18px;font-weight:900;color:var(--green)}
+
+/* SALARIES / LOANS */
+.sal-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);margin-bottom:6px}
+.sal-av{width:32px;height:32px;border-radius:50%;background:var(--surface3);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.sal-name{font-size:13px;font-weight:800;color:var(--text)}
+.sal-when{font-size:11px;color:var(--text2);margin-top:1px}
+.sal-amount{font-size:16px;font-weight:900;color:var(--text)}
+.loan-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);margin-bottom:8px}
+.loan-name{font-size:14px;font-weight:800;color:var(--text)}
+.loan-sub{font-size:11px;color:var(--text2);font-weight:600;margin-top:2px}
+.loan-amount{font-size:15px;font-weight:900;color:var(--red)}
+
+/* FORMS */
+.field label{font-family:'Instrument Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);display:block;margin-bottom:5px}
+.field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Cabinet Grotesk',sans-serif;font-size:14px;font-weight:600;padding:9px 12px;outline:none;transition:border-color 0.15s}
+.field input:focus,.field select:focus{border-color:var(--amber)}
+.field select option{background:var(--surface2)}
+.btn-primary{background:var(--text);color:var(--bg);border:none;border-radius:var(--radius-sm);padding:10px 18px;font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.btn-primary:hover{opacity:0.85}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 18px;font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+.del-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:2px 6px;border-radius:4px;line-height:1;transition:all 0.15s}
+.del-btn:hover{color:var(--red);background:var(--red-dim)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius);padding:28px;width:90%;max-width:460px;box-shadow:var(--shadow-lg);border:1px solid var(--border);animation:slideUp 0.2s ease;max-height:90vh;overflow-y:auto}
+.modal-lg{max-width:580px}
+@keyframes slideUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-size:20px;font-weight:900;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--text2);font-weight:600;margin-bottom:20px}
+.modal-row{display:grid;gap:12px;margin-bottom:12px}
+.modal-row.c2{grid-template-columns:1fr 1fr}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.modal-info{background:var(--surface2);border-radius:10px;padding:14px 16px;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:16px}
+.modal-info strong{color:var(--red);font-size:22px;display:block;font-weight:900;margin-top:3px}
+.cd-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.cd-stat{background:var(--surface2);border-radius:10px;padding:12px 14px}
+.cd-stat-lbl{font-family:'Instrument Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:4px}
+.cd-stat-val{font-size:18px;font-weight:900}
+.section-mini{font-family:'Instrument Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.hist-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto}
+.hist-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+.hist-ico{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.hist-name{font-size:12px;font-weight:700;flex:1}
+.hist-date{font-size:10px;color:var(--text2)}
+.hist-amt{font-size:13px;font-weight:900}
+.empty{text-align:center;padding:20px;color:var(--text3);font-size:12px;font-weight:700}
+
+@media(max-width:1100px){.cc-grid,.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:800px){.g2,.g3{grid-template-columns:1fr}.cc-grid,.g4{grid-template-columns:1fr}.container{padding:16px}.header{padding:0 16px}.header-stats{display:none}.amz-form{grid-template-columns:1fr 1fr}.bank-input{font-size:32px}}
+.cc-tile,.panel,.amz-panel,.pos-card,.bank-hero{animation:fadeUp 0.3s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">BDL<em>CASH</em></div>
+  <div class="today-badge" id="todayBadge"></div>
+  <div class="header-stats">
+    <div class="hstat"><div class="hstat-label">Monzo Balance</div><div class="hstat-value cm" id="hBank">£—</div></div>
+    <div class="hstat"><div class="hstat-label">Amazon Pending</div><div class="hstat-value ca" id="hPending">£—</div></div>
+    <div class="hstat"><div class="hstat-label">Due 7 Days</div><div class="hstat-value cr" id="hDue7">£—</div></div>
+    <div class="hstat"><div class="hstat-label">Total Card Debt</div><div class="hstat-value cr" id="hCardDebt">£—</div></div>
+  </div>
+</header>
+
+<div class="alerts-bar" id="alertsBar"></div>
+
+<div class="container">
+
+  <div class="slabel">Business Bank · Monzo</div>
+  <div class="bank-hero" onclick="openBankModal()">
+    <div class="bank-left">
+      <div class="bank-badge">Business Bank Balance <span class="monzo-tag">MONZO</span> <span style="opacity:0.35;font-size:9px">· tap for details</span></div>
+      <div style="font-family:'Instrument Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:2px">Current Balance</div>
+      <div class="bank-amount-row" style="position:relative">
+        <span class="bank-prefix">£</span>
+        <input class="bank-input" type="number" id="bankInput" placeholder="0.00" step="0.01" oninput="updateBank()" onclick="event.stopPropagation()" style="opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;z-index:2" />
+        <div id="bankDisplay" style="font-size:48px;font-weight:900;color:#fff;line-height:1;cursor:text" onclick="event.stopPropagation();document.getElementById('bankInput').focus()">0.00</div>
+      </div>
+      <div class="bank-meta" id="bankMeta">Tap number to update · tap card for full details</div>
+    </div>
+    <div class="bank-right">
+      <div class="bank-stat"><div class="bank-stat-lbl">Amazon Pending</div><div class="bank-stat-val" id="bsPending">£0</div></div>
+      <div class="bank-stat"><div class="bank-stat-lbl">Due This Week</div><div class="bank-stat-val" id="bsDue7">£0</div></div>
+    </div>
+  </div>
+
+  <div class="g4" style="margin-top:16px">
+    <div class="pos-card green"><div class="pos-card-label">Amazon Pending</div><div class="pos-card-value" id="pcPending">£0</div><div class="pos-card-sub" id="pcPendingSub">No requests</div></div>
+    <div class="pos-card red"><div class="pos-card-label">Total Card Balances</div><div class="pos-card-value" id="pcCards">£0</div><div class="pos-card-sub">across 4 cards</div></div>
+    <div class="pos-card amber"><div class="pos-card-label">Due in 7 Days</div><div class="pos-card-value" id="pcDue7">£0</div><div class="pos-card-sub" id="pcDue7Sub">—</div></div>
+    <div class="pos-card blue"><div class="pos-card-label">Monthly Salaries</div><div class="pos-card-value">£7,830</div><div class="pos-card-sub">fixed monthly total</div></div>
+  </div>
+
+  <div class="slabel">Credit Cards · tap any card for full details</div>
+  <div class="cc-grid" id="cardGrid"></div>
+
+  <div class="slabel">Cash Flow · Amazon</div>
+  <div class="amz-panel">
+    <div class="panel-header" style="cursor:pointer" onclick="openAmazonModal()">
+      <div class="panel-title"><div class="panel-icon" style="background:rgba(255,214,10,0.14)">📦</div>Amazon Payout Tracker</div>
+      <span style="font-family:'Instrument Mono',monospace;font-size:10px;color:var(--amber);opacity:0.7">tap for full history →</span>
+    </div>
+    <div class="panel-body">
+      <div class="amz-form">
+        <div class="field"><label>Amount Requested (£)</label><input type="number" id="amzAmt" placeholder="e.g. 3500" step="0.01" /></div>
+        <div class="field"><label>Date Requested</label><input type="date" id="amzDate" /></div>
+        <div class="field"><label>Note</label><input type="text" id="amzNote" placeholder="Sun night…" /></div>
+        <button class="btn-primary btn-sm" onclick="logPayout()" style="align-self:flex-end;background:var(--amber);color:#000">+ Log Request</button>
+      </div>
+      <div id="payoutList"><div class="empty">No payout requests yet.</div></div>
+    </div>
+  </div>
+
+  <div class="g3" style="margin-top:16px">
+    <div class="panel blue-border">
+      <div class="panel-header">
+        <div class="panel-title"><div class="panel-icon" style="background:var(--blue-dim)">🧠</div>Card Strategy — Use This Card Now</div>
+      </div>
+      <div class="panel-body">
+        <div id="strategyMain"></div>
+        <div id="strategyAiBox" style="background:var(--surface2);border:1px solid rgba(77,166,255,0.2);border-radius:var(--radius-sm);padding:14px 16px;margin-top:12px;min-height:48px"></div>
+        <div class="purchase-rec" style="margin-top:12px">
+          <div class="purchase-rec-label">Specific purchase recommendation</div>
+          <div class="purchase-rec-row">
+            <div class="field" style="flex:1;margin:0">
+              <input type="number" id="purchaseAmt" placeholder="Enter £ amount..." style="width:100%" oninput="getPurchaseRec()" />
+            </div>
+            <div class="field" style="width:120px;margin:0">
+              <select id="purchaseType" onchange="getPurchaseRec()">
+                <option value="uk">UK Stock</option>
+                <option value="expense">Expense</option>
+              </select>
+            </div>
+          </div>
+          <div class="purchase-rec-result" id="purchaseResult"></div>
+          <div id="purchaseAiInsight" style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.6;display:none"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><div class="panel-icon" style="background:var(--blue-dim)">👥</div>Salaries & Payroll</div>
+        <span style="font-family:'Instrument Mono',monospace;font-size:9px;color:var(--text3)">via Monzo</span>
+      </div>
+      <div class="panel-body" id="salaryGrid"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><div class="panel-icon" style="background:rgba(175,82,222,0.14)">🏦</div>Loans & Finance</div>
+        <button class="btn-primary btn-sm" onclick="openModal('loanModal')">+ Add</button>
+      </div>
+      <div class="panel-body" id="loanList"><div class="empty">Add loans above.</div></div>
+    </div>
+  </div>
+
+  <!-- OTHER INCOME -->
+  <div class="slabel">Other Income</div>
+  <div class="g2">
+    <div class="panel green-border">
+      <div class="panel-header">
+        <div class="panel-title"><div class="panel-icon" style="background:var(--green-dim)">💰</div>Expected Income</div>
+        <button class="btn-primary btn-sm" onclick="openModal('incomeModal')" style="background:var(--green);color:#000">+ Add</button>
+      </div>
+      <div class="panel-body" id="incomeList"><div class="empty">No income added yet. VAT returns, refunds etc.</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><div class="panel-icon" style="background:var(--red-dim)">📅</div>Upcoming Outgoings</div>
+      </div>
+      <div class="panel-body">
+        <div class="view-tabs">
+          <button class="view-tab active" onclick="switchView(7,this)">7 Days</button>
+          <button class="view-tab" onclick="switchView(14,this)">14 Days</button>
+          <button class="view-tab" onclick="switchView(30,this)">30 Days</button>
+        </div>
+        <div id="outgoingList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AVIOS -->
+  <div class="avios-bar">
+    <div class="avios-icon" onclick="openModal('aviosModal')" style="cursor:pointer;title='tap for breakdown'">✈️</div>
+    <div class="avios-info">
+      <div class="avios-label">Avios Points — This Month</div>
+      <div class="avios-value" id="aviosTotal">0</div>
+      <div class="avios-sub" id="aviosSub">1pt per £1 · tracked via balance changes</div>
+    </div>
+    <div class="avios-breakdown" id="aviosBreakdown"></div>
+    <button onclick="resetAvios()" style="background:rgba(191,95,255,0.15);border:1px solid rgba(191,95,255,0.3);color:#bf5fff;border-radius:8px;padding:8px 14px;font-family:'Cabinet Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Reset Month</button>
+  </div>
+
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal">
+    <div class="modal-title" id="payModalTitle">Make a Payment</div>
+    <div class="modal-info">Total card balance: <strong id="payModalBal">£0</strong></div>
+    <div id="payStatInfo" style="margin-bottom:12px;display:none"></div>
+    <div class="modal-row"><div class="field"><label>Amount Paying (£)</label><input type="number" id="payAmt" placeholder="0.00" step="0.01" /></div></div>
+    <p style="font-size:12px;color:var(--text2);font-weight:600;margin-top:8px">⚡ Deducts from card balance + statement due + Monzo simultaneously</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('paymentModal')">Cancel</button>
+      <button class="btn-primary" onclick="confirmPayment()">Confirm Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- STATEMENT DUE MODAL -->
+<div class="modal-overlay" id="statDueModal">
+  <div class="modal">
+    <div class="modal-title" id="statDueTitle">📋 Statement Closed</div>
+    <div class="modal-sub" id="statDueSub">Enter the statement details</div>
+    <div id="statDueSummary" style="display:none;background:var(--surface2);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--text2)"></div>
+    <div class="modal-row c2">
+      <div class="field"><label>Statement Close Date</label><input type="date" id="statCloseInput" /></div>
+      <div class="field"><label>Original Balance at Close (£)</label><input type="number" id="statOriginalAmt" placeholder="0.00" step="0.01" oninput="updateStatSummary()" /></div>
+    </div>
+    <div class="modal-row c2">
+      <div class="field"><label>Amount Still Owed (£)</label><input type="number" id="statDueAmt" placeholder="0.00" step="0.01" oninput="updateStatSummary()" /></div>
+      <div class="field"><label>Payment Due Date</label><input type="date" id="statDueDateInput" /></div>
+    </div>
+    <div id="statCalcBox" style="display:none;background:var(--amber-dim);border:1px solid rgba(255,214,10,0.25);border-radius:8px;padding:10px 12px;font-size:12px;font-weight:700;color:var(--amber);margin-bottom:4px"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('statDueModal')">Skip for now</button>
+      <button class="btn-primary" onclick="saveStatDue()">Save</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="editCardModal">
+  <div class="modal">
+    <div class="modal-title" id="editCardTitle">Update Card Balance</div>
+    <div class="modal-sub">Enter your current balance on this card</div>
+    <div class="modal-row"><div class="field"><label>Current Balance (£)</label><input type="number" id="editCardBal" placeholder="0.00" step="0.01" /></div></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('editCardModal')">Cancel</button>
+      <button class="btn-primary" onclick="confirmEditCard()">Save Balance</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARD DETAIL MODAL -->
+<div class="modal-overlay" id="cardDetailModal">
+  <div class="modal modal-lg">
+    <div id="cardDetailContent"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('cardDetailModal')">Close</button>
+      <button class="btn-primary" id="cardDetailPayBtn">💳 Make a Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- BANK MODAL -->
+<div class="modal-overlay" id="bankModal">
+  <div class="modal modal-lg">
+    <div class="modal-title">Business Bank — Monzo</div>
+    <div class="modal-sub" id="bankModalDate"></div>
+    <div class="cd-stat-row">
+      <div class="cd-stat"><span class="cd-stat-lbl">Current Balance</span><span class="cd-stat-val cm" id="bm-bal">£0</span></div>
+      <div class="cd-stat"><span class="cd-stat-lbl">Amazon In Flight</span><span class="cd-stat-val ca" id="bm-pending">£0</span></div>
+      <div class="cd-stat"><span class="cd-stat-lbl">Effective Position</span><span class="cd-stat-val" id="bm-eff">£0</span></div>
+    </div>
+    <div class="cd-stat-row">
+      <div class="cd-stat"><span class="cd-stat-lbl">Due This Week</span><span class="cd-stat-val cr" id="bm-due7">£0</span></div>
+      <div class="cd-stat"><span class="cd-stat-lbl">Due 30 Days</span><span class="cd-stat-val cr" id="bm-due30">£0</span></div>
+      <div class="cd-stat"><span class="cd-stat-lbl">Total Card Debt</span><span class="cd-stat-val cr" id="bm-carddebt">£0</span></div>
+    </div>
+    <div class="section-mini">Update Balance</div>
+    <div class="modal-row"><div class="field"><label>New Monzo Balance (£)</label><input type="number" id="bankModalInput" placeholder="0.00" step="0.01" /></div></div>
+    <div class="section-mini">Transaction History</div>
+    <div class="hist-list" id="bankHistory"><div class="empty">No history yet.</div></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('bankModal')">Close</button>
+      <button class="btn-primary" onclick="saveBankFromModal()">Update Balance</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOAN MODAL -->
+<div class="modal-overlay" id="loanModal">
+  <div class="modal">
+    <div class="modal-title">Add Loan</div>
+    <div class="modal-row c2">
+      <div class="field"><label>Lender / Name</label><input type="text" id="loanName" placeholder="e.g. Iwoca" /></div>
+      <div class="field"><label>Outstanding Balance (£)</label><input type="number" id="loanBal" placeholder="0.00" /></div>
+    </div>
+    <div class="modal-row c2">
+      <div class="field"><label>Monthly Repayment (£)</label><input type="number" id="loanPay" placeholder="0.00" /></div>
+      <div class="field"><label>Payment Day of Month</label><input type="number" id="loanDay" placeholder="e.g. 1" min="1" max="31" /></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('loanModal')">Cancel</button>
+      <button class="btn-primary" onclick="addLoan()">Add Loan</button>
+    </div>
+  </div>
+</div>
+
+<!-- AVIOS MODAL -->
+<div class="modal-overlay" id="aviosModal">
+  <div class="modal modal-lg">
+    <div class="modal-title">✈️ Avios Points</div>
+    <div class="modal-sub" id="aviosModalSub"></div>
+    <div class="cd-stat-row">
+      <div class="cd-stat"><span class="cd-stat-lbl">Amex Platinum</span><span class="cd-stat-val" style="color:#d080ff" id="av-plat">0</span></div>
+      <div class="cd-stat"><span class="cd-stat-lbl">Amex Gold</span><span class="cd-stat-val" style="color:#d080ff" id="av-gold">0</span></div>
+      <div class="cd-stat"><span class="cd-stat-lbl">Capital on Tap</span><span class="cd-stat-val" style="color:#d080ff" id="av-cot">0</span></div>
+    </div>
+    <div style="background:linear-gradient(135deg,#180d38,#2a1060);border-radius:10px;padding:16px 18px;margin-bottom:16px;text-align:center">
+      <div style="font-family:'Instrument Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(191,95,255,0.6);margin-bottom:4px">TOTAL THIS MONTH</div>
+      <div style="font-size:38px;font-weight:900;color:#d080ff" id="av-total">0</div>
+    </div>
+    <div class="section-mini">Previous Months</div>
+    <div class="hist-list" id="aviosHistory" style="max-height:200px"><div class="empty">No history yet.</div></div>
+    <div class="section-mini">How It Works</div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.7;background:var(--surface2);border-radius:8px;padding:12px 14px">
+      Points tracked automatically via balance updates. When a card balance goes up (more spent), the difference = Avios at 1pt per £1. Resets on 1st of each month and archives to history automatically.
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="resetAvios()">Reset Month</button>
+      <button class="btn-primary" onclick="closeModal('aviosModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- AMAZON HISTORY MODAL -->
+<div class="modal-overlay" id="amazonModal">
+  <div class="modal modal-lg">
+    <div class="modal-title">Amazon Payouts</div>
+    <div class="modal-sub">Full payout history</div>
+    <div class="section-mini">All Requests</div>
+    <div class="hist-list" id="amazonHistoryList" style="max-height:320px"><div class="empty">No history yet.</div></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('amazonModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- INCOME MODAL -->
+<div class="modal-overlay" id="incomeModal">
+  <div class="modal">
+    <div class="modal-title">Add Expected Income</div>
+    <div class="modal-row c2">
+      <div class="field"><label>Description</label><input type="text" id="incomeName" placeholder="e.g. VAT Return" /></div>
+      <div class="field"><label>Amount (£)</label><input type="number" id="incomeAmt" placeholder="0.00" /></div>
+    </div>
+    <div class="modal-row">
+      <div class="field"><label>Expected in how many days?</label><input type="number" id="incomeDays" placeholder="e.g. 3" min="0" max="365" /></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('incomeModal')">Cancel</button>
+      <button class="btn-primary" onclick="addIncome()" style="background:var(--green);color:#000">Add Income</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Amex uses real cycle dates (statClose = when cycle ends, dueDate = when you must pay)
+// cotAvailable=true means the balance stored is what's LEFT to spend (COT style)
+// cotAvailable=false means the balance stored is what's BEEN SPENT (Amex/Barclays style)
+// Amex cycle length ~28 days. statClose/dueDate auto-advance each cycle.
+const CARDS_CFG=[
+  {id:'amex-plat',name:'Amex Platinum',tag:'Stock Purchases',cls:'plat',balance:0,limit:11800,
+   statClose:'2026-03-26',dueDate:'2026-04-24',cycleType:'amex',cotAvailable:false,
+   color:'#c0c0c0',network:'PLATINUM',monthStart:null,monthEnd:null,
+   statementDue:null,statementDueDate:null},
+  {id:'amex-gold',name:'Amex Gold',tag:'Stock · Charge Card',cls:'gold',balance:0,limit:20000,
+   statClose:'2026-04-03',dueDate:'2026-04-28',cycleType:'amex',cotAvailable:false,
+   color:'#d4a017',network:'GOLD',monthStart:null,monthEnd:null,
+   statementDue:null,statementDueDate:null},
+  {id:'cot',name:'Capital on Tap',tag:'EU Stock · 0% Fees',cls:'cot',balance:0,limit:12000,
+   statDay:2,dueDay:10,cycleType:'dom',cotWarn:true,cotAvailable:true,
+   color:'#ffd200',network:'VISA',monthStart:null,monthEnd:null,
+   statementDue:null,statementDueDate:null},
+  {id:'barclays',name:'Barclays Business',tag:'Stock & Expenses',cls:'barc',balance:0,limit:4000,
+   statDay:19,dueDay:16,cycleType:'dom',cotWarn:false,cotAvailable:false,
+   color:'#0056b3',network:'VISA',monthStart:null,monthEnd:null,
+   statementDue:null,statementDueDate:null},
+];
+const VA_LAST=new Date(2025,2,20);
+let S={bank:0,cards:JSON.parse(JSON.stringify(CARDS_CFG)),payouts:[],loans:[],outView:7,bankHistory:[],cardHistory:{},income:[],avios:{plat:0,gold:0,cot:0,month:new Date().getMonth(),prevBalances:{},history:[]}};
+CARDS_CFG.forEach(c=>S.cardHistory[c.id]=[]);
+let activePayId=null,activeEditId=null;
+
+function save(){localStorage.setItem('bdlcash_v3',JSON.stringify({bank:S.bank,cardBalances:S.cards.map(c=>({id:c.id,balance:c.balance,statClose:c.statClose,dueDate:c.dueDate,statementBalance:c.statementBalance,monthStart:c.monthStart,monthEnd:c.monthEnd,statementDue:c.statementDue,statementDueDate:c.statementDueDate,statementOriginal:c.statementOriginal})),payouts:S.payouts,loans:S.loans,bankHistory:S.bankHistory,cardHistory:S.cardHistory,income:S.income,avios:S.avios}));}
+function load(){
+  const r=localStorage.getItem('bdlcash_v3');if(!r)return;
+  const d=JSON.parse(r);
+  S.bank=d.bank||0;
+  if(d.cardBalances)d.cardBalances.forEach(cb=>{
+    const c=S.cards.find(x=>x.id===cb.id);
+    if(c){c.balance=cb.balance||0;if(cb.statClose)c.statClose=cb.statClose;if(cb.dueDate)c.dueDate=cb.dueDate;if(cb.statementBalance!=null)c.statementBalance=cb.statementBalance;if(cb.monthStart!=null)c.monthStart=cb.monthStart;if(cb.monthEnd!=null)c.monthEnd=cb.monthEnd;if(cb.statementDue!=null)c.statementDue=cb.statementDue;if(cb.statementDueDate)c.statementDueDate=cb.statementDueDate;if(cb.statementOriginal!=null)c.statementOriginal=cb.statementOriginal;}
+  });
+  S.payouts=d.payouts||[];S.loans=d.loans||[];S.bankHistory=d.bankHistory||[];S.cardHistory=d.cardHistory||{};S.income=d.income||[];
+  if(d.avios)S.avios=d.avios;
+  const thisMonth=new Date().getMonth();
+  if(S.avios.month!==thisMonth){
+    // Archive current month before resetting
+    if(!S.avios.history)S.avios.history=[];
+    const mn=new Date(new Date().getFullYear(),S.avios.month,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+    if((S.avios.plat||0)+(S.avios.gold||0)+(S.avios.cot||0)>0){
+      S.avios.history.unshift({month:mn,plat:S.avios.plat||0,gold:S.avios.gold||0,cot:S.avios.cot||0});
+    }
+    S.avios={plat:0,gold:0,cot:0,month:thisMonth,prevBalances:{},history:S.avios.history||[]};
+  }
+  if(!S.avios.history)S.avios.history=[];
+  CARDS_CFG.forEach(c=>{if(!S.cardHistory[c.id])S.cardHistory[c.id]=[];});
+}
+
+const fmt=n=>{const v=parseFloat(n)||0;return(v<0?'-£':'£')+Math.abs(v).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})};
+const fmtK=n=>{const v=parseFloat(n)||0;if(Math.abs(v)>=1000)return(v<0?'-£':'£')+(Math.abs(v)/1000).toFixed(1)+'k';return fmt(v)};
+function today(){const d=new Date();d.setHours(0,0,0,0);return d;}
+function addWD(date,n){const d=new Date(date);let a=0;while(a<n){d.setDate(d.getDate()+1);const w=d.getDay();if(w!==0&&w!==6)a++;}return d;}
+function daysUntilDom(dom){const t=today(),tgt=new Date(t.getFullYear(),t.getMonth(),dom);if(tgt<=t)tgt.setMonth(tgt.getMonth()+1);return Math.round((tgt-t)/86400000);}
+function nextDom(dom){const t=today(),tgt=new Date(t.getFullYear(),t.getMonth(),dom);if(tgt<=t)tgt.setMonth(tgt.getMonth()+1);return tgt;}
+function dayLbl(d){if(d===0)return'TODAY';if(d===1)return'TMRW';return d+'d';}
+function ddmm(d){return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit'});}
+function shortDate(d){return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
+function nowStr(){return new Date().toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}
+function nextVA(){const l=new Date(VA_LAST),t=today(),n=new Date(l);while(n<=t)n.setDate(n.getDate()+14);return n;}
+function updateTodayBadge(){const n=new Date();document.getElementById('todayBadge').innerHTML=n.toLocaleDateString('en-GB',{weekday:'long'})+' · <strong>'+n.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+'</strong>';}
+
+// For Amex: advance cycle dates ~28 days forward if current dates have passed
+function advanceAmexCycle(c){
+  if(c.cycleType!=='amex')return;
+  const t=today();
+  // If both stat close AND due date are in the past, advance both by ~28 days
+  const sc=new Date(c.statClose),dd=new Date(c.dueDate);
+  if(dd<t){
+    const gap=Math.round((dd-sc)/86400000); // preserve gap between close and due
+    sc.setDate(sc.getDate()+28);
+    dd.setTime(sc.getTime()+gap*86400000);
+    c.statClose=sc.toISOString().split('T')[0];
+    c.dueDate=dd.toISOString().split('T')[0];
+    c.statementBalance=null; // reset statement balance for new cycle
+    save();
+  }
+}
+// Days until a specific date string e.g. '2026-03-26'
+function daysUntilDate(dateStr){
+  const t=today(),d=new Date(dateStr);d.setHours(0,0,0,0);
+  return Math.round((d-t)/86400000);
+}
+// Get card's stat/due days remaining, handling both amex and dom cards
+function cardDays(c){
+  if(c.cycleType==='amex'){
+    advanceAmexCycle(c);
+    return{sd:daysUntilDate(c.statClose),dd:daysUntilDate(c.dueDate),nsd:new Date(c.statClose),ndd:new Date(c.dueDate)};
+  }else{
+    return{sd:daysUntilDom(c.statDay),dd:daysUntilDom(c.dueDay),nsd:nextDom(c.statDay),ndd:nextDom(c.dueDay)};
+  }
+}
+// What to show as the main balance number and label
+function cardBalanceDisplay(c){
+  if(c.cotAvailable){
+    // COT: stored balance = available to spend
+    const spent=Math.max(0,c.limit-c.balance);
+    return{mainAmt:c.balance,mainLbl:'Available to Spend',subLbl:`${fmt(spent)} spent · ${fmt(c.limit)} limit`};
+  }else{
+    // Amex/Barclays: stored balance = amount spent
+    const avail=Math.max(0,c.limit-c.balance);
+    return{mainAmt:c.balance,mainLbl:'Balance Spent',subLbl:`${fmt(avail)} available · ${fmt(c.limit)} limit`};
+  }
+}
+// Usage % for progress bar
+function cardUsagePct(c){
+  if(c.cotAvailable) return c.limit>0?Math.min(100,((c.limit-c.balance)/c.limit)*100):0;
+  return c.limit>0?Math.min(100,(c.balance/c.limit)*100):0;
+}
+
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+function updateBank(){
+  S.bank=parseFloat(document.getElementById('bankInput').value)||0;
+  document.getElementById('bankMeta').textContent='Updated just now · saved';
+  const disp=document.getElementById('bankDisplay');
+  if(disp)disp.textContent=S.bank.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+  save();renderAll();
+}
+
+function openBankModal(){
+  const pi=S.payouts.filter(p=>p.stage!=='arrived').reduce((s,p)=>s+p.amt,0);
+  const d7=getAllOuts().filter(i=>i.days<=7).reduce((s,i)=>s+i.amt,0);
+  const d30=getAllOuts().filter(i=>i.days<=30).reduce((s,i)=>s+i.amt,0);
+  const cd=S.cards.reduce((s,c)=>s+c.balance,0);
+  document.getElementById('bankModalDate').textContent=shortDate(new Date());
+  document.getElementById('bm-bal').textContent=fmt(S.bank);
+  document.getElementById('bm-pending').textContent=fmt(pi);
+  document.getElementById('bm-eff').textContent=fmt(S.bank+pi);
+  document.getElementById('bm-due7').textContent=fmt(d7);
+  document.getElementById('bm-due30').textContent=fmt(d30);
+  document.getElementById('bm-carddebt').textContent=fmt(cd);
+  document.getElementById('bankModalInput').value=S.bank||'';
+  const h=document.getElementById('bankHistory');
+  h.innerHTML=S.bankHistory.length?S.bankHistory.slice(0,12).map(x=>`<div class="hist-item"><div class="hist-ico" style="background:${x.type==='in'?'var(--green-dim)':'var(--red-dim)'}">${x.type==='in'?'📥':'📤'}</div><div style="flex:1"><div class="hist-name">${x.label}</div><div class="hist-date">${x.date}</div></div><div class="hist-amt" style="color:${x.type==='in'?'var(--green)':'var(--red)'}">${x.type==='in'?'+':'-'}${fmt(x.amt)}</div></div>`).join(''):'<div class="empty">No history yet.</div>';
+  openModal('bankModal');
+}
+function saveBankFromModal(){
+  S.bank=parseFloat(document.getElementById('bankModalInput').value)||0;
+  document.getElementById('bankInput').value=S.bank.toFixed(2);
+  const disp=document.getElementById('bankDisplay');
+  if(disp)disp.textContent=S.bank.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('bankMeta').textContent='Updated · saved';
+  save();renderAll();closeModal('bankModal');
+}
+
+function openCardDetail(id){
+  const c=S.cards.find(x=>x.id===id);
+  const {sd,dd,nsd,ndd}=cardDays(c);
+  const {mainAmt,mainLbl,subLbl}=cardBalanceDisplay(c);
+  const pct=cardUsagePct(c);
+  const avail=c.cotAvailable?c.balance:Math.max(0,c.limit-c.balance);
+  const spent=c.cotAvailable?Math.max(0,c.limit-c.balance):c.balance;
+  const heroBg=c.cls==='plat'?'linear-gradient(135deg,#d0d0d0,#b8b8b8)':c.cls==='gold'?'linear-gradient(135deg,#a86c0a,#f0bc28)':c.cls==='cot'?'linear-gradient(135deg,#0d0d0d,#1e1e1e)':'linear-gradient(135deg,#002f70,#004ea8)';
+  const htxt=c.cls==='plat'?'#1a1a1a':'#fff';
+  const hist=S.cardHistory[id]||[];
+  const isAmex=c.cycleType==='amex';
+  const statBal=c.statementBalance!=null?`<div style="background:rgba(255,214,10,0.1);border:1px solid rgba(255,214,10,0.25);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;font-weight:700;color:var(--amber)">📋 Statement balance at cycle close: <strong>${fmt(c.statementBalance)}</strong> — this is what you need to pay by ${ddmm(ndd)}</div>`:'';
+  document.getElementById('cardDetailContent').innerHTML=`
+    <div style="background:${heroBg};color:${htxt};border-radius:12px;padding:20px;margin-bottom:18px">
+      <div style="font-size:11px;font-weight:800;letter-spacing:2px;opacity:0.58;text-transform:uppercase;margin-bottom:4px">${c.name}</div>
+      <div style="font-size:36px;font-weight:900;margin-bottom:2px">${fmt(mainAmt)}</div>
+      <div style="font-size:12px;opacity:0.55;font-weight:600">${mainLbl}</div>
+      <div style="height:5px;background:rgba(${c.cls==='plat'?'0,0,0':'255,255,255'},0.18);border-radius:100px;overflow:hidden;margin-top:10px">
+        <div style="height:100%;width:${pct}%;background:${c.cls==='plat'?'rgba(0,0,0,0.55)':'rgba(255,255,255,0.85)'};border-radius:100px"></div>
+      </div>
+    </div>
+    ${statBal}
+    <div class="cd-stat-row">
+      <div class="cd-stat"><span class="cd-stat-lbl">${c.cotAvailable?'Available':'Spent'}</span><span class="cd-stat-val ${c.cotAvailable?'cg':'cr'}">${fmt(mainAmt)}</span></div>
+      <div class="cd-stat"><span class="cd-stat-lbl">${c.cotAvailable?'Spent':'Available'}</span><span class="cd-stat-val ${c.cotAvailable?'cr':'cg'}">${fmt(c.cotAvailable?spent:avail)}</span></div>
+      <div class="cd-stat"><span class="cd-stat-lbl">Usage</span><span class="cd-stat-val" style="color:${pct>85?'var(--red)':pct>65?'var(--amber)':'var(--green)'}">${Math.round(pct)}%</span></div>
+    </div>
+    <div class="cd-stat-row">
+      <div class="cd-stat">
+        <span class="cd-stat-lbl">Cycle Closes</span>
+        <span class="cd-stat-val" style="font-size:15px">IN ${sd} DAYS</span>
+        <span style="font-family:'Instrument Mono',monospace;font-size:13px;color:var(--text2);display:block;margin-top:3px">${ddmm(nsd)}</span>
+      </div>
+      <div class="cd-stat">
+        <span class="cd-stat-lbl">Payment Due</span>
+        <span class="cd-stat-val" style="font-size:15px;color:${dd<=3?'var(--red)':dd<=7?'var(--amber)':'var(--green)'}">IN ${dd} DAYS</span>
+        <span style="font-family:'Instrument Mono',monospace;font-size:13px;color:var(--text2);display:block;margin-top:3px">${ddmm(ndd)}</span>
+      </div>
+      <div class="cd-stat"><span class="cd-stat-lbl">Credit Limit</span><span class="cd-stat-val" style="font-size:15px">${fmt(c.limit)}</span></div>
+    </div>
+    ${isAmex?`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--text2);font-weight:600">ℹ️ Amex: you must pay at least the <strong style="color:var(--text)">statement balance</strong> (what was on the card when cycle closed on ${ddmm(nsd)}), not just the current balance. Next cycle auto-advances ~28 days after due date.</div>`:''}
+    ${c.cotWarn?`<div style="background:rgba(255,210,0,0.12);border:1px solid rgba(255,210,0,0.28);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:12px;font-weight:700;color:var(--amber)">⚠️ COT bank transfer — allow 48–72hrs. Transfer by <strong>${ddmm(new Date(ndd.getTime()-3*86400000))}</strong>, not ${ddmm(ndd)}.</div>`:''}
+    <div class="section-mini">Month Tracking</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="field">
+        <label>Balance Start of Month (£)</label>
+        <input type="number" id="cardMonthStart" value="${c.monthStart||''}" placeholder="0.00" step="0.01" />
+      </div>
+      <div class="field">
+        <label>Balance End of Month (£)</label>
+        <input type="number" id="cardMonthEnd" value="${c.monthEnd||''}" placeholder="0.00" step="0.01" />
+      </div>
+    </div>
+    ${(c.monthStart!=null&&c.monthEnd!=null)?`<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;font-weight:700;color:var(--text2)">📊 Month spend: <span style="color:var(--red)">${fmt(c.monthEnd-c.monthStart)}</span> · Avg daily: <span style="color:var(--amber)">${fmt((c.monthEnd-c.monthStart)/30)}</span></div>`:''}
+    <div class="section-mini">Payment History</div>
+    <div class="hist-list">${hist.length?hist.slice(0,8).map(h=>`<div class="hist-item"><div class="hist-ico" style="background:var(--green-dim)">💳</div><div style="flex:1"><div class="hist-name">${h.label||'Payment made'}</div><div class="hist-date">${h.date}</div></div><div class="hist-amt cg">-${fmt(h.amt)}</div></div>`).join(''):'<div class="empty">No payments logged yet.</div>'}</div>
+  `;
+  document.getElementById('cardDetailPayBtn').onclick=()=>{closeModal('cardDetailModal');openPay(id);};
+  // Save month start/end on close
+  document.getElementById('cardDetailModal').querySelector('.btn-secondary').onclick=()=>{
+    const ms=parseFloat(document.getElementById('cardMonthStart').value);
+    const me=parseFloat(document.getElementById('cardMonthEnd').value);
+    const card=S.cards.find(x=>x.id===id);
+    if(!isNaN(ms))card.monthStart=ms;
+    if(!isNaN(me))card.monthEnd=me;
+    save();renderAll();closeModal('cardDetailModal');
+  };
+  openModal('cardDetailModal');
+}
+function openPay(id){
+  activePayId=id;
+  const c=S.cards.find(x=>x.id===id);
+  document.getElementById('payModalTitle').textContent='Pay — '+c.name;
+  document.getElementById('payModalBal').textContent=fmt(c.balance);
+  document.getElementById('payAmt').value='';
+  // Show statement due info if exists
+  const statInfo=document.getElementById('payStatInfo');
+  if(statInfo){
+    if(c.statementDue&&c.statementDue>0){
+      statInfo.style.display='block';
+      statInfo.innerHTML=`<div style="background:rgba(255,79,79,0.12);border:1px solid rgba(255,79,79,0.3);border-radius:8px;padding:10px 12px;font-size:12px;font-weight:700;color:var(--red)">
+        ⚠️ Statement balance due: <strong>${fmt(c.statementDue)}</strong>${c.statementDueDate?' by '+ddmm(c.statementDueDate):''}
+        <button onclick="document.getElementById('payAmt').value='${c.statementDue.toFixed(2)}'" style="margin-left:10px;background:var(--red);color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif">Pay this amount</button>
+      </div>`;
+    }else{statInfo.style.display='none';}
+  }
+  openModal('paymentModal');
+}
+function confirmPayment(){
+  const amt=parseFloat(document.getElementById('payAmt').value)||0;if(!amt)return;
+  const c=S.cards.find(x=>x.id===activePayId);
+  c.balance=Math.max(0,c.balance-amt);
+  // Also reduce statement due if it exists
+  if(c.statementDue&&c.statementDue>0){
+    c.statementDue=Math.max(0,c.statementDue-amt);
+    if(c.statementDue===0)c.statementDueDate=null;
+  }
+  S.bank=Math.max(0,S.bank-amt);
+  document.getElementById('bankInput').value=S.bank.toFixed(2);
+  if(!S.cardHistory[activePayId])S.cardHistory[activePayId]=[];
+  S.cardHistory[activePayId].unshift({amt,label:'Payment made',date:nowStr()});
+  S.bankHistory.unshift({amt,label:c.name+' payment',date:nowStr(),type:'out'});
+  save();renderAll();closeModal('paymentModal');
+}
+function openEdit(id){activeEditId=id;const c=S.cards.find(x=>x.id===id);document.getElementById('editCardTitle').textContent='Update '+c.name;document.getElementById('editCardBal').value=c.balance||'';openModal('editCardModal');}
+function confirmEditCard(){
+  const newBal=parseFloat(document.getElementById('editCardBal').value)||0;
+  const c=S.cards.find(x=>x.id===activeEditId);
+  const oldBal=c.balance||0;
+  c.balance=newBal;
+  // Avios delta tracking — if balance went UP on an avios card, track the spend
+  const aviosCards={
+    'amex-plat':'plat',
+    'amex-gold':'gold',
+    'cot':'cot'
+  };
+  const aviosKey=aviosCards[c.id];
+  if(aviosKey){
+    // For COT: available went DOWN = spent more (balance = available remaining)
+    // For Amex: balance went UP = spent more
+    const delta=c.cotAvailable?(oldBal-newBal):(newBal-oldBal);
+    if(delta>0){
+      if(!S.avios[aviosKey])S.avios[aviosKey]=0;
+      S.avios[aviosKey]+=Math.round(delta);
+    }
+  }
+  save();renderAll();closeModal('editCardModal');
+}
+
+function logPayout(){
+  const amt=parseFloat(document.getElementById('amzAmt').value);
+  const date=document.getElementById('amzDate').value;
+  const note=document.getElementById('amzNote').value.trim();
+  if(!amt||!date){alert('Enter amount and date.');return;}
+  const eta=addWD(new Date(date),4);
+  S.payouts.unshift({id:Date.now(),amt,date,note,eta:eta.toISOString().split('T')[0],stage:'requested',etaDays:4});
+  document.getElementById('amzAmt').value='';document.getElementById('amzNote').value='';
+  save();renderAll();
+}
+function setEta(id,days){
+  const p=S.payouts.find(x=>x.id===id);if(!p)return;
+  p.etaDays=parseInt(days);p.eta=addWD(new Date(p.date),parseInt(days)).toISOString().split('T')[0];
+  save();renderAll();
+}
+function delPayout(id){S.payouts=S.payouts.filter(x=>x.id!==id);save();renderAll();}
+
+function addLoan(){
+  const name=document.getElementById('loanName').value.trim();
+  const bal=parseFloat(document.getElementById('loanBal').value);
+  const pay=parseFloat(document.getElementById('loanPay').value);
+  const day=parseInt(document.getElementById('loanDay').value);
+  if(!name||!bal||!pay||!day){alert('Fill all fields.');return;}
+  S.loans.push({id:Date.now(),name,bal,pay,day});
+  ['loanName','loanBal','loanPay','loanDay'].forEach(i=>document.getElementById(i).value='');
+  save();renderAll();closeModal('loanModal');
+}
+function delLoan(id){S.loans=S.loans.filter(x=>x.id!==id);save();renderAll();}
+function switchView(days,el){S.outView=days;document.querySelectorAll('.view-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderOuts();}
+
+function getAllOuts(){
+  const items=[],t=today();
+  S.cards.forEach(c=>{
+    if(c.balance>0){
+      const {dd}=cardDays(c);
+      const cotWarn=c.cotWarn||false;
+      const eff=cotWarn?dd-3:dd;
+      // For outgoings, Amex payment = statement balance if set, else current balance
+      const payAmt=c.cycleType==='amex'&&c.statementBalance!=null?c.statementBalance:c.balance;
+      items.push({days:dd,eff,label:c.name+(cotWarn?' ⚠️':''),amt:payAmt,cat:'Card',urgent:eff<=2,soon:eff<=5});
+    }
+  });
+  S.loans.forEach(l=>{const d=daysUntilDom(l.day);items.push({days:d,eff:d,label:l.name,amt:l.pay,cat:'Loan',urgent:d<=2,soon:d<=5});});
+  const s15=daysUntilDom(15);
+  items.push({days:s15,eff:s15,label:'Becki + Jack Salaries',amt:4500,cat:'Salary',urgent:s15<=2,soon:s15<=5});
+  items.push({days:s15,eff:s15,label:'Admin VA 15th',amt:165,cat:'VA Pay',urgent:s15<=2,soon:s15<=5});
+  const s30=daysUntilDom(30);
+  items.push({days:s30,eff:s30,label:'Admin VA 30th (incl OT)',amt:500,cat:'VA Pay',urgent:s30<=2,soon:s30<=5});
+  const nv=nextVA(),vd=Math.round((nv-t)/86400000);
+  items.push({days:vd,eff:vd,label:'Sourcing VAs ×2 (biweekly)',amt:700,cat:'VA Pay',urgent:vd<=2,soon:vd<=5});
+  return items.sort((a,b)=>a.days-b.days);
+}
+
+function renderCards(){
+  document.getElementById('cardGrid').innerHTML=S.cards.map(c=>{
+    const {sd,dd,nsd,ndd}=cardDays(c);
+    const {mainAmt,mainLbl,subLbl}=cardBalanceDisplay(c);
+    const pct=cardUsagePct(c);
+    const cotWarn=c.cotWarn||false;
+    const eff=cotWarn?dd-3:dd;
+    const dc=eff<=2?'urgent':eff<=5?'soon':'';
+
+    // ── AMEX PLAT + GOLD ──────────────────────────────────────
+    if(c.cycleType==='amex'){
+      const hasStatDue=c.statementDue&&c.statementDue>0;
+      const statPaid=c.statementDue===0;
+      const dueDaysLeft=c.statementDueDate?Math.round((new Date(c.statementDueDate)-today())/86400000):null;
+      const thisCycleSpend=hasStatDue?Math.max(0,mainAmt-c.statementDue):null;
+
+      // Balance due box colours
+      let dueBg,dueColor,dueBorder,dueTag;
+      if(statPaid||(!hasStatDue&&c.statementDue===0)){
+        dueBg='rgba(0,230,118,0.12)';dueColor='#00e676';dueBorder='rgba(0,230,118,0.3)';dueTag='✅ All paid up';
+      }else if(hasStatDue){
+        if(dueDaysLeft!==null&&dueDaysLeft<=5){
+          dueBg='rgba(255,69,58,0.15)';dueColor='#ff453a';dueBorder='rgba(255,69,58,0.4)';
+          dueTag=dueDaysLeft<=0?'⚠️ OVERDUE':dueDaysLeft===1?'DUE TOMORROW':`${dueDaysLeft}d LEFT`;
+        }else{
+          dueBg='rgba(255,184,0,0.12)';dueColor='#ffd60a';dueBorder='rgba(255,184,0,0.3)';
+          dueTag=dueDaysLeft!==null?`${dueDaysLeft}d left`:'';
+        }
+      }else{
+        dueBg='rgba(255,255,255,0.06)';dueColor=c.cls==='plat'?'rgba(0,0,0,0.4)':'rgba(255,255,255,0.4)';dueBorder='rgba(255,255,255,0.1)';dueTag='No statement due';
+      }
+
+      const isDark=c.cls==='cot'||c.cls==='barc'; // gold now uses dark text
+      const textMuted=isDark?'rgba(255,255,255,0.55)':'rgba(0,0,0,0.5)';
+      const textMain=isDark?'#fff':'#111';
+
+      return `<div class="cc-tile ${c.cls}" onclick="openCardDetail('${c.id}')">
+        <div class="cc-shine"></div>
+        <div class="cc-body">
+          <div class="cc-top-row"><div class="cc-chip"></div><div class="cc-network">${c.network}</div></div>
+
+          <!-- TOTAL BALANCE -->
+          <div onclick="event.stopPropagation();openEdit('${c.id}')" style="cursor:pointer;margin:14px 0 6px">
+            <div style="font-family:'Instrument Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:${textMuted};margin-bottom:3px">TOTAL BALANCE ✏️</div>
+            <div style="font-size:32px;font-weight:900;color:${textMain};line-height:1">${fmt(mainAmt)}</div>
+            <div style="font-size:11px;color:${textMuted};margin-top:3px;font-weight:600">${subLbl}</div>
+          </div>
+
+          <!-- BALANCE DUE BOX -->
+          <div onclick="event.stopPropagation();${hasStatDue?`openPay('${c.id}')`:''}" style="
+            background:${dueBg};border:1px solid ${dueBorder};border-radius:10px;
+            padding:10px 12px;margin:8px 0;
+            ${hasStatDue?'cursor:pointer;':''};
+          ">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${hasStatDue?4:0}px">
+              <div style="font-family:'Instrument Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:${hasStatDue||statPaid?dueColor:'#666'};font-weight:700">
+                BALANCE DUE${c.statementDueDate?' · '+ddmm(c.statementDueDate):''}
+              </div>
+              <div style="font-size:10px;font-weight:800;color:${hasStatDue||statPaid?dueColor:'#666'}">${dueTag}</div>
+            </div>
+            ${hasStatDue?`
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font-size:22px;font-weight:900;color:${dueColor};line-height:1">${fmt(c.statementDue)}</div>
+              <div style="background:${dueColor};color:#fff;border-radius:7px;padding:5px 12px;font-size:11px;font-weight:800">PAY</div>
+            </div>`:
+            `<div style="font-size:13px;font-weight:700;color:#555">${statPaid?'✅ Statement cleared':'Not set — tap 📋 to add'}</div>`}
+          </div>
+
+          ${thisCycleSpend!==null?`
+          <div style="font-family:'Instrument Mono',monospace;font-size:9px;color:${textMuted};margin-bottom:8px">
+            THIS CYCLE: <span style="font-weight:700;color:${textMain}">${fmt(thisCycleSpend)}</span> new spend
+          </div>`:''}
+
+          <div class="cc-usage-bar"><div class="cc-usage-fill" style="width:${pct}%"></div></div>
+
+          <div class="cc-due-row">
+            <div class="cc-due-blk">
+              <span class="cc-due-blk-lbl">Closes</span>
+              <span class="cc-due-countdown">IN ${sd}D</span>
+              <span class="cc-due-date-txt">${ddmm(nsd)}</span>
+            </div>
+            <div class="cc-due-blk">
+              <span class="cc-due-blk-lbl">Pay By</span>
+              <span class="cc-due-countdown ${dc}">IN ${dd}D</span>
+              <span class="cc-due-date-txt">${ddmm(ndd)}</span>
+            </div>
+          </div>
+
+          <div class="cc-btn-row" onclick="event.stopPropagation()">
+            <button class="cc-pay-btn" onclick="openPay('${c.id}')">💳 Made a Payment</button>
+            <button class="cc-info-btn" onclick="openCardDetail('${c.id}')">ℹ️</button>
+            <button class="cc-info-btn" onclick="openStatDueModal('${c.id}')" title="Set statement due" style="font-size:12px;font-weight:800">📋</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // ── COT + BARCLAYS ────────────────────────────────────────
+    return `<div class="cc-tile ${c.cls}" onclick="openCardDetail('${c.id}')">
+      <div class="cc-shine"></div>
+      <div class="cc-body">
+        <div class="cc-top-row"><div class="cc-chip"></div><div class="cc-network">${c.network}</div></div>
+
+        <div onclick="event.stopPropagation();openEdit('${c.id}')" style="cursor:pointer;margin:14px 0 6px">
+          <div style="font-family:'Instrument Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;opacity:0.55;margin-bottom:3px">${mainLbl} ✏️</div>
+          <div class="cc-balance-amount">${fmt(mainAmt)}</div>
+          <div class="cc-limit-txt">${subLbl}</div>
+        </div>
+
+        <div class="cc-usage-bar"><div class="cc-usage-fill" style="width:${pct}%"></div></div>
+        ${cotWarn&&eff<=4?`<div class="cot-strip">⚠️ Transfer NOW — ${dd}d left</div>`:''}
+
+        <div class="cc-due-row">
+          <div class="cc-due-blk">
+            <span class="cc-due-blk-lbl">Statement</span>
+            <span class="cc-due-countdown">IN ${sd}D</span>
+            <span class="cc-due-date-txt">${ddmm(nsd)}</span>
+          </div>
+          <div class="cc-due-blk">
+            <span class="cc-due-blk-lbl">${cotWarn?'Transfer By':'Due'}</span>
+            <span class="cc-due-countdown ${dc}">IN ${eff}D</span>
+            <span class="cc-due-date-txt">${cotWarn?ddmm(new Date(ndd.getTime()-3*86400000)):ddmm(ndd)}</span>
+          </div>
+        </div>
+
+        <div class="cc-btn-row" onclick="event.stopPropagation()">
+          <button class="cc-pay-btn" onclick="openPay('${c.id}')">💳 Made a Payment</button>
+          <button class="cc-info-btn" onclick="openCardDetail('${c.id}')">ℹ️</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPayouts(){
+  const el=document.getElementById('payoutList'),t=today();
+  if(!S.payouts.length){el.innerHTML='<div class="empty">No payout requests yet. Log one above and track it here.</div>';return;}
+
+  // Group by days away
+  const pending=S.payouts.filter(p=>p.stage!=='arrived');
+  const arrived=S.payouts.filter(p=>p.stage==='arrived').slice(0,3);
+
+  let html='';
+
+  // Group pending by ETA days
+  const groups={};
+  pending.forEach(p=>{
+    const eta=new Date(p.eta);
+    const d=Math.round((eta-t)/86400000);
+    const key=d<=0?0:d;
+    if(!groups[key])groups[key]=[];
+    groups[key].push({...p,daysAway:d});
+  });
+
+  Object.keys(groups).sort((a,b)=>parseInt(a)-parseInt(b)).forEach(key=>{
+    const d=parseInt(key);
+    const headerTxt=d<=0?'CHECK YOUR MONZO — MAY HAVE ARRIVED':d===1?'AMAZON PAY — TOMORROW':'AMAZON PAY — IN '+d+' DAYS';
+    const headerColor=d<=0?'var(--green)':'var(--blue)';
+    html+=`<div class="monzo-payout-group"><div class="monzo-payout-header" style="color:${headerColor}">${headerTxt}</div>`;
+    groups[key].forEach(p=>{
+      const overdue=p.daysAway<0;
+      html+=`<div class="monzo-payout-card${overdue?' soon':''}">
+        <div class="monzo-payout-icon">${overdue?'⚠️':'📦'}</div>
+        <div class="monzo-payout-info">
+          <div class="monzo-payout-label">Amazon Pay${p.note?' — '+p.note:''}</div>
+          <div class="monzo-payout-sub">Requested ${ddmm(p.date)} · ETA ${ddmm(p.eta)}</div>
+        </div>
+        <div class="monzo-payout-amount">+${fmt(p.amt)}</div>
+        <div class="monzo-payout-actions">
+          <select class="eta-sel" onchange="setEta(${p.id},this.value)" title="Update ETA">
+            <option value="1" ${p.etaDays==1?'selected':''}>1 day</option>
+            <option value="2" ${p.etaDays==2?'selected':''}>2 days</option>
+            <option value="3" ${p.etaDays==3?'selected':''}>3 days</option>
+            <option value="4" ${(p.etaDays==4||!p.etaDays)?'selected':''}>4 days</option>
+            <option value="5" ${p.etaDays==5?'selected':''}>5 days</option>
+          </select>
+          <button class="monzo-arrive-btn" onclick="markArrived(${p.id})">✓ Arrived</button>
+          <button class="del-btn" onclick="delPayout(${p.id})">×</button>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  });
+
+  if(arrived.length){
+    html+=`<div class="monzo-payout-group"><div class="monzo-payout-header" style="color:var(--green)">ARRIVED RECENTLY</div>`;
+    arrived.forEach(p=>{
+      html+=`<div class="monzo-payout-card arrived">
+        <div class="monzo-payout-icon">✅</div>
+        <div class="monzo-payout-info">
+          <div class="monzo-payout-label">Amazon Pay${p.note?' — '+p.note:''}</div>
+          <div class="monzo-payout-sub">Arrived ${ddmm(p.eta)}</div>
+        </div>
+        <div class="monzo-payout-amount">+${fmt(p.amt)}</div>
+        <div class="monzo-payout-actions">
+          <button class="del-btn" onclick="delPayout(${p.id})">×</button>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  el.innerHTML=html||'<div class="empty">No payout requests yet.</div>';
+}
+
+function markArrived(id){
+  const p=S.payouts.find(x=>x.id===id);if(!p)return;
+  p.stage='arrived';
+  S.bank+=p.amt;
+  document.getElementById('bankInput').value=S.bank.toFixed(2);
+  S.bankHistory.unshift({amt:p.amt,label:'Amazon payout'+(p.note?' — '+p.note:''),date:nowStr(),type:'in'});
+  save();renderAll();
+}
+
+function renderOuts(){
+  const el=document.getElementById('outgoingList'),items=getAllOuts().filter(i=>i.days<=S.outView);
+  if(!items.length){el.innerHTML=`<div class="empty">Nothing due in ${S.outView} days 👌</div>`;return;}
+  el.innerHTML=items.map(i=>`<div class="out-item ${i.urgent?'urgent':i.soon?'soon':''}">
+    <div class="out-day ${i.days===0?'now':''}">${dayLbl(i.days)}</div>
+    <div class="out-name">${i.label}</div>
+    <span class="out-cat">${i.cat}</span>
+    <div class="out-amount">${fmt(i.amt)}</div>
+  </div>`).join('');
+}
+
+function calcFloat(c){
+  const {sd,dd}=cardDays(c);
+  // Float = days until cycle closes + payment window after close
+  // Amex: ~26 day payment window. DOM cards: ~16 days
+  const payWindow=c.cycleType==='amex'?26:16;
+  return sd>0?(sd+payWindow):dd;
+}
+
+function renderStrategy(){
+  const mainEl=document.getElementById('strategyMain');
+  if(!mainEl)return;
+
+  const CARD_BG={plat:'linear-gradient(135deg,#d0d0d0,#c0c0c0)',gold:'linear-gradient(135deg,#c89010,#f0c030)',barc:'linear-gradient(135deg,#003580,#0056b3)'};
+  const CARD_TEXT={plat:'#111',gold:'#000',barc:'#fff'};
+
+  const scored=S.cards.filter(c=>c.id!=='cot').map(c=>{
+    const avail=Math.max(0,c.limit-c.balance);
+    const floatDays=calcFloat(c);
+    const pct=cardUsagePct(c);
+    const score=floatDays-(pct>85?999:pct>70?20:0);
+    return{c,avail,floatDays,score,pct};
+  }).sort((a,b)=>b.score-a.score);
+
+  const best=scored[0];
+  const fallback=scored[1];
+  const cot=S.cards.find(c=>c.id==='cot');
+  const cotFloat=calcFloat(cot);
+  const cotAvail=cot.balance;
+  const cotEff=daysUntilDom(cot.dueDay)-3;
+  const {sd:bestSd}=cardDays(best.c);
+  const cycleAge=Math.max(0,(best.c.cycleType==='amex'?28:30)-bestSd);
+
+  mainEl.innerHTML=`
+    <div style="background:${CARD_BG[best.c.cls]};border-radius:14px;padding:20px 22px;margin-bottom:10px">
+      <div style="font-family:'Instrument Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:${CARD_TEXT[best.c.cls]};opacity:0.6;margin-bottom:4px">USE THIS CARD NOW</div>
+      <div style="font-size:26px;font-weight:900;color:${CARD_TEXT[best.c.cls]};margin-bottom:10px">${best.c.name}</div>
+      <div style="display:flex;gap:16px">
+        <div><div style="font-family:'Instrument Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:${CARD_TEXT[best.c.cls]};opacity:0.55;margin-bottom:2px">Float</div><div style="font-size:22px;font-weight:900;color:${CARD_TEXT[best.c.cls]}">${best.floatDays}d</div></div>
+        <div><div style="font-family:'Instrument Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:${CARD_TEXT[best.c.cls]};opacity:0.55;margin-bottom:2px">Available</div><div style="font-size:22px;font-weight:900;color:${CARD_TEXT[best.c.cls]}">${fmtK(best.avail)}</div></div>
+        <div><div style="font-family:'Instrument Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:${CARD_TEXT[best.c.cls]};opacity:0.55;margin-bottom:2px">Cycle Age</div><div style="font-size:22px;font-weight:900;color:${CARD_TEXT[best.c.cls]}">${cycleAge}d in</div></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:4px">
+      <div style="flex:1;background:var(--surface2);border-radius:10px;padding:12px 14px;border:1px solid var(--border)">
+        <div style="font-family:'Instrument Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Fallback</div>
+        <div style="font-size:14px;font-weight:800;color:var(--text)">${fallback.c.name}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${fallback.floatDays}d float · ${fmtK(fallback.avail)} left</div>
+      </div>
+      <div style="flex:1;background:var(--surface2);border-radius:10px;padding:12px 14px;border:1px solid ${cotEff>5?'rgba(255,210,0,0.3)':'rgba(255,79,79,0.3)'}">
+        <div style="font-family:'Instrument Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:4px">COT — EU Only</div>
+        <div style="font-size:14px;font-weight:800;color:${cotEff>5?'var(--amber)':'var(--red)'}">${cotEff>5?'✅ Available':'⚠️ Near Transfer'}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${fmtK(cotAvail)} left · ${cotFloat}d float</div>
+      </div>
+    </div>`;
+
+  const aiBox=document.getElementById('strategyAiBox');
+  if(aiBox&&!aiBox.dataset.loaded) triggerStrategyAI(best,fallback,scored);
+}
+
+function triggerStrategyAI(best,fallback,scored){
+  const aiBox=document.getElementById('strategyAiBox');
+  if(!aiBox)return;
+  aiBox.dataset.loaded='1';
+  const {sd:bestSd,dd:bestDd}=cardDays(best.c);
+  const cycleAge=Math.max(0,(best.c.cycleType==='amex'?28:30)-bestSd);
+  const {sd:fallSd}=cardDays(fallback.c);
+  const floatDiff=best.floatDays-fallback.floatDays;
+  let lines=[];
+  if(cycleAge<=4){
+    lines.push(`🚀 <strong>${best.c.name}</strong> just opened its cycle ${cycleAge} day${cycleAge===1?'':'s'} ago — peak front-loading territory. Spending now gives the full ${best.floatDays}-day float, meaning stock bought today doesn't need to be paid for until ${ddmm(cardDays(best.c).ndd)}. Maximum time for inventory to sell and Amazon payouts to land before the card is due.`);
+  }else if(cycleAge<=12){
+    lines.push(`✅ <strong>${best.c.name}</strong> is ${cycleAge} days into its cycle with ${best.floatDays} days of float remaining — still a strong window. Every purchase now has ${best.floatDays} days before payment, giving stock time to be prepped, shipped to Amazon, sold and paid out.`);
+  }else if(bestSd<=7){
+    lines.push(`⚠️ <strong>${best.c.name}</strong> is the best option but closes in ${bestSd}d. After that the new cycle opens with ~${best.c.cycleType==='amex'?54:46} days of fresh float — consider timing bigger buys just after the close date.`);
+  }else{
+    lines.push(`📊 <strong>${best.c.name}</strong> leads with ${best.floatDays} days of float — ${floatDiff} days more than ${fallback.c.name}. That extra ${floatDiff} days means more time for stock to convert to cash before payment is due.`);
+  }
+  if(fallback.floatDays>=40){
+    lines.push(`<strong>${fallback.c.name}</strong> is a solid fallback with ${fallback.floatDays}d float — use it if ${best.c.name} fills up.`);
+  }else{
+    lines.push(`<strong>${fallback.c.name}</strong> has ${fallback.floatDays}d float as fallback — shorter window, prioritise ${best.c.name}.`);
+  }
+  const cot=S.cards.find(c=>c.id==='cot');
+  const cotEff=daysUntilDom(cot.dueDay)-3;
+  if(cotEff>5&&cot.balance>0){
+    lines.push(`COT has ${fmt(cot.balance)} available for EU stock — safe to use with ${cotEff}d before transfer needed.`);
+  }else if(cotEff<=4){
+    lines.push(`⚠️ COT transfer deadline in ${cotEff}d — avoid EU purchases until paid.`);
+  }
+  const nearLimit=scored.filter(({pct})=>pct>=85);
+  if(nearLimit.length){
+    lines.push(`🔴 ${nearLimit.map(({c})=>c.name).join(', ')} near limit — pay down before loading more stock.`);
+  }
+  aiBox.innerHTML=`<div style="font-family:'Instrument Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:8px">🧠 STRATEGY INSIGHT</div><div style="font-size:12px;color:var(--text2);line-height:1.7">${lines.map(l=>`<p style="margin-bottom:6px">${l}</p>`).join('')}</div>`;
+}
+
+function getPurchaseRec(){
+  const amt=parseFloat(document.getElementById('purchaseAmt').value)||0;
+  const type=document.getElementById('purchaseType').value;
+  const res=document.getElementById('purchaseResult');
+  const insight=document.getElementById('purchaseAiInsight');
+  if(!amt){res.style.display='none';insight.style.display='none';return;}
+  let best=null,bestScore=-999;
+  S.cards.filter(c=>c.id!=='cot').forEach(c=>{
+    const {sd}=cardDays(c);
+    const avail=Math.max(0,c.limit-c.balance);
+    if(avail<amt)return;
+    const floatDays=calcFloat(c);
+    const cycleDays=c.cycleType==='amex'?28:30;
+    const cycleAge=Math.max(0,cycleDays-sd);
+    let score=floatDays*2+Math.max(0,10-cycleAge)*4;
+    score-=((c.limit>0?(c.balance/c.limit)*100:0))/2;
+    if(c.id!=='barclays')score+=10;
+    if(score>bestScore){bestScore=score;best=c;}
+  });
+  if(!best){
+    res.style.cssText='display:block;background:var(--red-dim);border:1px solid rgba(255,79,79,0.3);color:var(--red);padding:10px 12px;border-radius:8px';
+    res.innerHTML='⛔ No card has enough available. Pay down a card first.';
+    insight.style.display='none';
+    return;
+  }
+  const {dd:bestDd,sd:bestSd}=cardDays(best);
+  const bestAvail=Math.max(0,best.limit-best.balance);
+  const bestFloat=calcFloat(best);
+  const cycleAge=Math.max(0,(best.cycleType==='amex'?28:30)-bestSd);
+  const earnsAvios=best.id!=='barclays';
+  res.style.cssText='display:block;background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);color:var(--green);padding:10px 12px;border-radius:8px;font-weight:800';
+  res.innerHTML=`✅ Use <strong>${best.name}</strong>${earnsAvios?' · earns Avios':''}`;
+  let why='';
+  if(cycleAge<=4){
+    why=`<strong>${best.name}</strong> is only ${cycleAge} day${cycleAge===1?'':'s'} into its cycle — front-loading now gives the full ${bestFloat}-day float. This £${amt.toLocaleString()} of stock doesn't need to be paid until ${ddmm(cardDays(best).ndd)}, giving plenty of time for it to sell on Amazon and the payout to land.`;
+  }else if(bestFloat>=40){
+    why=`<strong>${best.name}</strong> has ${bestFloat} days of float with ${fmt(bestAvail)} available. Spending £${amt.toLocaleString()} now means payment isn't due until ${ddmm(cardDays(best).ndd)} — enough time for stock to move through Amazon and pay out.`;
+  }else{
+    why=`<strong>${best.name}</strong> is the best option with ${bestFloat}d float and ${fmt(bestAvail)} available. Payment due ${ddmm(cardDays(best).ndd)}.${earnsAvios?' Earns Avios on this spend.':''}`;
+  }
+  const closingSoon=S.cards.filter(c=>c.id!=='cot'&&c.id!==best.id).find(c=>{const {sd}=cardDays(c);return sd<=5;});
+  if(closingSoon){const {sd:csd}=cardDays(closingSoon);why+=` <em style="color:var(--amber)">Note: ${closingSoon.name} closes in ${csd}d — fresh cycle opens then with maximum float.</em>`;}
+  insight.style.display='block';
+  insight.innerHTML=`<div style="font-family:'Instrument Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:5px">💡 WHY THIS CARD</div><div style="font-size:12px;color:var(--text2);line-height:1.6">${why}</div>`;
+}
+
+// INCOME
+function addIncome(){
+  const name=document.getElementById('incomeName').value.trim();
+  const amt=parseFloat(document.getElementById('incomeAmt').value);
+  const days=parseInt(document.getElementById('incomeDays').value);
+  if(!name||!amt||isNaN(days)){alert('Fill all fields.');return;}
+  S.income.push({id:Date.now(),name,amt,days,addedDate:new Date().toISOString().split('T')[0]});
+  ['incomeName','incomeAmt','incomeDays'].forEach(i=>document.getElementById(i).value='');
+  save();renderAll();closeModal('incomeModal');
+}
+function delIncome(id){S.income=S.income.filter(x=>x.id!==id);save();renderAll();}
+
+function renderIncome(){
+  const el=document.getElementById('incomeList');
+  if(!S.income.length){el.innerHTML='<div class="empty">No income added yet.<br>VAT returns, refunds, other payments.</div>';return;}
+  const t=today();
+  const items=S.income.map(inc=>{
+    // Calculate days remaining from when it was added
+    const added=new Date(inc.addedDate);
+    const elapsed=Math.round((t-added)/86400000);
+    const remaining=Math.max(0,inc.days-elapsed);
+    return{...inc,remaining};
+  }).sort((a,b)=>a.remaining-b.remaining);
+  el.innerHTML=items.map(inc=>`
+    <div class="income-item">
+      <div class="income-days-block">
+        <span class="income-days-num">${inc.remaining===0?'TODAY':inc.remaining}</span>
+        <span class="income-days-lbl">${inc.remaining===0?'arriving':'days'}</span>
+      </div>
+      <div class="income-name">${inc.name}</div>
+      <div class="income-amount">+${fmt(inc.amt)}</div>
+      <button class="del-btn" onclick="delIncome(${inc.id})">×</button>
+    </div>`).join('');
+}
+
+function resetAvios(){
+  if(!confirm('Reset Avios points to zero for this month?'))return;
+  S.avios={plat:0,gold:0,cot:0,month:new Date().getMonth(),prevBalances:{}};
+  save();renderAvios();
+}
+
+let activeStatDueCardId=null;
+function openStatDueModal(id){
+  activeStatDueCardId=id;
+  const c=S.cards.find(x=>x.id===id);
+  document.getElementById('statDueTitle').textContent=`📋 ${c.name} — Statement`;
+  document.getElementById('statDueSub').textContent=`Cycle closed ${c.statClose?ddmm(c.statClose):''}. Enter the statement details below.`;
+  document.getElementById('statOriginalAmt').value=c.statementOriginal||c.statementDue||'';
+  document.getElementById('statDueAmt').value=c.statementDue||'';
+  document.getElementById('statDueDateInput').value=c.statementDueDate||c.dueDate||'';
+  document.getElementById('statCloseInput').value=c.statClose||'';
+  // Show existing summary if we have data
+  const sumBox=document.getElementById('statDueSummary');
+  if(c.statementOriginal&&c.statementDue!=null){
+    const paid=c.statementOriginal-c.statementDue;
+    sumBox.style.display='block';
+    sumBox.innerHTML=`Last saved: Original <strong>${fmt(c.statementOriginal)}</strong> · Paid so far <strong style="color:var(--green)">${fmt(paid)}</strong> · Still owed <strong style="color:var(--red)">${fmt(c.statementDue)}</strong>`;
+  }else{sumBox.style.display='none';}
+  updateStatSummary();
+  openModal('statDueModal');
+}
+function updateStatSummary(){
+  const orig=parseFloat(document.getElementById('statOriginalAmt').value)||0;
+  const due=parseFloat(document.getElementById('statDueAmt').value)||0;
+  const box=document.getElementById('statCalcBox');
+  if(orig>0&&due>=0){
+    const paid=orig-due;
+    box.style.display='block';
+    box.innerHTML=`Original: ${fmt(orig)} · Paid: ${fmt(Math.max(0,paid))} · Still owed: ${fmt(due)}`;
+  }else{box.style.display='none';}
+}
+function saveStatDue(){
+  const orig=parseFloat(document.getElementById('statOriginalAmt').value)||0;
+  const amt=parseFloat(document.getElementById('statDueAmt').value)||0;
+  const date=document.getElementById('statDueDateInput').value;
+  const closeDate=document.getElementById('statCloseInput').value;
+  const c=S.cards.find(x=>x.id===activeStatDueCardId);
+  if(c){
+    c.statementDue=amt;
+    c.statementDueDate=date;
+    c.statementOriginal=orig||amt; // if no original given, use due amount
+    if(closeDate)c.statClose=closeDate;
+  }
+  save();renderAll();closeModal('statDueModal');
+}
+function checkStatementPrompts(){
+  // Check if any Amex card had its cycle close 2 days ago and has no statementDue set
+  const t=today();
+  S.cards.filter(c=>c.cycleType==='amex').forEach(c=>{
+    if(c.statementDue!=null&&c.statementDue>0)return; // already set
+    const closeDate=new Date(c.statClose);
+    const daysSinceClose=Math.round((t-closeDate)/86400000);
+    if(daysSinceClose===2||daysSinceClose===3){
+      // Prompt once — store that we've prompted
+      const promptKey=`prompted_${c.id}_${c.statClose}`;
+      if(!localStorage.getItem(promptKey)){
+        localStorage.setItem(promptKey,'1');
+        setTimeout(()=>openStatDueModal(c.id),800);
+      }
+    }
+  });
+}
+function openAmazonModal(){
+  const hist=document.getElementById('amazonHistoryList');
+  if(!S.payouts.length){hist.innerHTML='<div class="empty">No payout history yet.</div>';openModal('amazonModal');return;}
+  const t=today();
+  hist.innerHTML=S.payouts.map(p=>{
+    const eta=new Date(p.eta);
+    const daysToEta=Math.round((eta-t)/86400000);
+    const isArrived=p.stage==='arrived';
+    const statusColor=isArrived?'var(--green)':daysToEta<0?'var(--red)':'var(--amber)';
+    const statusTxt=isArrived?'Arrived':daysToEta<0?`${Math.abs(daysToEta)}d overdue`:`ETA ${daysToEta}d`;
+    return`<div class="hist-item">
+      <div class="hist-ico" style="background:${isArrived?'var(--green-dim)':'var(--amber-dim)'}">${isArrived?'✅':'📦'}</div>
+      <div style="flex:1">
+        <div class="hist-name">${p.note||'Amazon Payout'}</div>
+        <div class="hist-date">Requested ${ddmm(p.date)} · ETA ${ddmm(p.eta)}</div>
+      </div>
+      <div class="hist-amt" style="color:${statusColor}">+${fmt(p.amt)}</div>
+      <div style="font-family:'Instrument Mono',monospace;font-size:10px;color:${statusColor};margin-left:8px;font-weight:700">${statusTxt}</div>
+    </div>`;
+  }).join('');
+  openModal('amazonModal');
+}
+
+function renderAvios(){
+  const total=(S.avios.plat||0)+(S.avios.gold||0)+(S.avios.cot||0);
+  document.getElementById('aviosTotal').textContent=total.toLocaleString('en-GB');
+  const mn=new Date().toLocaleDateString('en-GB',{month:'long'});
+  document.getElementById('aviosSub').textContent=`${mn} · tap ✈️ for breakdown · resets 1st`;
+  document.getElementById('aviosBreakdown').innerHTML=`
+    <div class="avios-card-item"><div class="avios-card-name">Amex Plat</div><div class="avios-card-pts">${(S.avios.plat||0).toLocaleString()}</div></div>
+    <div class="avios-card-item"><div class="avios-card-name">Amex Gold</div><div class="avios-card-pts">${(S.avios.gold||0).toLocaleString()}</div></div>
+    <div class="avios-card-item"><div class="avios-card-name">COT</div><div class="avios-card-pts">${(S.avios.cot||0).toLocaleString()}</div></div>
+  `;
+  // Modal fields
+  const el=id=>document.getElementById(id);
+  if(el('aviosModalSub'))el('aviosModalSub').textContent=mn+' · tracked via balance updates';
+  if(el('av-plat'))el('av-plat').textContent=(S.avios.plat||0).toLocaleString('en-GB');
+  if(el('av-gold'))el('av-gold').textContent=(S.avios.gold||0).toLocaleString('en-GB');
+  if(el('av-cot'))el('av-cot').textContent=(S.avios.cot||0).toLocaleString('en-GB');
+  if(el('av-total'))el('av-total').textContent=total.toLocaleString('en-GB');
+  // History
+  const hist=el('aviosHistory');
+  if(hist){
+    if(!S.avios.history||!S.avios.history.length){
+      hist.innerHTML='<div class="empty">No previous months yet — history will build up over time.</div>';
+    }else{
+      hist.innerHTML=S.avios.history.map(h=>{
+        const t=(h.plat||0)+(h.gold||0)+(h.cot||0);
+        return`<div class="hist-item">
+          <div class="hist-ico" style="background:var(--purple-dim)">✈️</div>
+          <div style="flex:1">
+            <div class="hist-name">${h.month}</div>
+            <div class="hist-date">Plat: ${(h.plat||0).toLocaleString()} · Gold: ${(h.gold||0).toLocaleString()} · COT: ${(h.cot||0).toLocaleString()}</div>
+          </div>
+          <div class="hist-amt" style="color:#d080ff">${t.toLocaleString()} pts</div>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
+function renderSalaries(){
+  const nv=nextVA();
+  const entries=[
+    {init:'BE',name:'Becki',sub:'15th every month',amt:2500},
+    {init:'JK',name:'Jack (You)',sub:'15th every month',amt:2000},
+    {init:'VA',name:'Sourcing VAs ×2',sub:`Biweekly Fri · next ${nv.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}`,amt:700},
+    {init:'AD',name:'Admin VA',sub:'15th £165 + 30th ~£500 incl OT',amt:665},
+  ];
+  document.getElementById('salaryGrid').innerHTML=entries.map(e=>`
+    <div class="sal-item">
+      <div class="sal-av">${e.init}</div>
+      <div style="flex:1"><div class="sal-name">${e.name}</div><div class="sal-when">${e.sub}</div></div>
+      <div class="sal-amount">${fmt(e.amt)}</div>
+    </div>`).join('');
+}
+
+function renderLoans(){
+  const el=document.getElementById('loanList');
+  if(!S.loans.length){el.innerHTML='<div class="empty">No loans added yet.</div>';return;}
+  el.innerHTML=S.loans.map(l=>`<div class="loan-item">
+    <div style="flex:1"><div class="loan-name">${l.name}</div><div class="loan-sub">Balance: ${fmt(l.bal)} · Due ${l.day}th · ${dayLbl(daysUntilDom(l.day))}</div></div>
+    <div class="loan-amount">${fmt(l.pay)}/mo</div>
+    <button class="del-btn" onclick="delLoan(${l.id})">×</button>
+  </div>`).join('');
+}
+
+function renderAlerts(){
+  const alerts=[];
+  S.cards.forEach(c=>{
+    if(c.balance>0){
+      const {dd}=cardDays(c);
+      const cotWarn=c.cotWarn||false;
+      if(cotWarn&&dd<=4)alerts.push({txt:`COT ${fmt(c.balance)} — BANK TRANSFER NOW (${dd}d left, needs 48–72hrs)`,red:true});
+      else if(!cotWarn&&dd<=3)alerts.push({txt:`${c.name} ${fmt(c.balance)} due in ${dd}d`,red:dd<=1});
+      if(c.limit>0&&(c.balance/c.limit)>=0.88)alerts.push({txt:`${c.name} at ${Math.round((c.balance/c.limit)*100)}% of limit`,red:false});
+    }
+    const {sd}=cardDays(c);
+    if(sd<=2)alerts.push({txt:`${c.name} cycle closes in ${sd}d — statement balance will lock in`,red:false});
+  });
+  const s15=daysUntilDom(15);
+  if(s15<=3)alerts.push({txt:`Salaries due in ${s15}d — need £4,665 in Monzo`,red:s15<=1});
+  const vd=Math.round((nextVA()-today())/86400000);
+  if(vd<=2)alerts.push({txt:`VA pay day in ${vd}d — £700+`,red:vd===0});
+  document.getElementById('alertsBar').innerHTML=alerts.map(a=>`<div class="alert-pill ${a.red?'red':''}"><span class="dot"></span>${a.txt}</div>`).join('');
+}
+
+function renderHeader(){
+  const pi=S.payouts.filter(p=>p.stage!=='arrived').reduce((s,p)=>s+p.amt,0);
+  const cd=S.cards.reduce((s,c)=>s+c.balance,0);
+  const d7=getAllOuts().filter(i=>i.days<=7).reduce((s,i)=>s+i.amt,0);
+  document.getElementById('hBank').textContent=fmtK(S.bank);
+  document.getElementById('hPending').textContent=fmtK(pi);
+  document.getElementById('hDue7').textContent=fmtK(d7);
+  document.getElementById('hCardDebt').textContent=fmtK(cd);
+  document.getElementById('bsPending').textContent=fmt(pi);
+  document.getElementById('bsDue7').textContent=fmt(d7);
+  const pending=S.payouts.filter(p=>p.stage!=='arrived');
+  document.getElementById('pcPending').textContent=fmt(pi);
+  document.getElementById('pcPendingSub').textContent=pending.length?`${pending.length} request${pending.length>1?'s':''} in flight`:'Nothing in flight';
+  document.getElementById('pcCards').textContent=fmt(cd);
+  document.getElementById('pcDue7').textContent=fmt(d7);
+  document.getElementById('pcDue7Sub').textContent=d7>0?(S.bank>=d7?'✓ You\'re covered':'⚠️ Gap: '+fmt(d7-S.bank)):'Clear this week';
+}
+
+function renderAll(){
+  renderHeader();renderAlerts();renderCards();renderPayouts();renderOuts();
+  // Reset AI strategy box so it refreshes
+  const aiBox=document.getElementById('strategyAiBox');
+  if(aiBox)delete aiBox.dataset.loaded;
+  renderStrategy();
+  renderSalaries();renderLoans();renderIncome();renderAvios();
+}
+
+load();
+updateTodayBadge();
+setInterval(updateTodayBadge,60000);
+document.getElementById('amzDate').value=new Date().toISOString().split('T')[0];
+if(S.bank){
+  document.getElementById('bankInput').value=S.bank.toFixed(2);
+  const disp=document.getElementById('bankDisplay');
+  if(disp)disp.textContent=S.bank.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+renderAll();
+checkStatementPrompts();
+</script>
+</body>
+</html>
